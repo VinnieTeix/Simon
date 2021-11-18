@@ -2,6 +2,8 @@ package Client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class InterfaceClient extends JFrame{
     public InterfaceClient(){
@@ -27,11 +29,23 @@ public class InterfaceClient extends JFrame{
         jpl.add(jaune);
         jpl.add(vert);
 
-        pack();
+
 
         add(jpl);
+        setSize(500,500);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+
+    }
+
+    public class ActionL implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JButton a = (JButton) e.getSource();
+            if (a.getText() == "Rouge"){
+                System.out.println("rouge");
+            }
+        }
     }
 }

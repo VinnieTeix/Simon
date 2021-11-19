@@ -62,7 +62,7 @@ public class ThreadServer extends Thread implements Serializable{
                     writer.println("correcte");
                     writer.flush();
                 } else {
-                    System.out.println("Incorrect.");
+                    System.out.println("Incorrect, press Start/Restart.");
                     sequenceServer.clear();
                 }
             } while(true);

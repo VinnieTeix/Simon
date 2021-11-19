@@ -77,12 +77,16 @@ public class InterfaceClient extends JFrame implements Serializable{
             JButton a = (JButton) e.getSource();
             if (a.getText().equals("Rouge")) {
                 sequence.add("rouge");
+                send();
             } else if (a.getText().equals("Bleu")) {
                 sequence.add("bleu");
+                send();
             } else if (a.getText().equals("Jaune")) {
                 sequence.add("jaune");
+                send();
             } else if (a.getText().equals("Vert")) {
                 sequence.add("vert");
+                send();
             } else if (a.getText().equals("Start/Restart")) {
                 sequence.clear();
                 try {
@@ -92,22 +96,24 @@ public class InterfaceClient extends JFrame implements Serializable{
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
-            } else {
-                System.out.println("Invalid input");
-            }
-            try {                                                           // Le client envoit la combinaison après
-                OutputStream out = client.getOutputStream();                // que chaque bouton est appuyé
-                ObjectOutputStream oout = new ObjectOutputStream(out);      // en temps réel
-                oout.writeObject(sequence);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            System.out.println(sequence.toString());
 
-            //if (sequence.size() > sequenceServ.size()){                     // Si le joueur dépasse le nombre d'entrée
-            //    sequence.clear();                                           // pour une combinaison elle sera
-            //}                                                               // réinitialisé mais la reception de la sequence
-                                                                                // du serveur fonctionne pas
+
+                //if (sequence.size() > sequenceServ.size()){                     // Si le joueur dépasse le nombre d'entrée
+                //    sequence.clear();                                           // pour une combinaison elle sera
+                //}                                                               // réinitialisé mais la reception de la sequence
+                // du serveur fonctionne pas
+            }
+
+        }
+        public void send(){
+            try {                                                       // Le client envoit la combinaison après
+            OutputStream out = client.getOutputStream();                // que chaque bouton est appuyé
+            ObjectOutputStream oout = new ObjectOutputStream(out);      // en temps réel
+            oout.writeObject(sequence);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+            System.out.println(sequence.toString());
         }
     }
 

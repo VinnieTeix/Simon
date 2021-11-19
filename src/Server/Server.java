@@ -67,42 +67,4 @@ public class Server extends JFrame implements Serializable {
         }
 
     }
-
-    public class Interface extends JFrame {
-        public Interface() {
-            setTitle("Server");
-            setSize(50, 50);
-            setVisible(true);
-
-            JButton kill = new JButton("Kill");
-            kill.addActionListener(new ActionS());
-
-            JButton start = new JButton("Start");
-
-            add(kill);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-        }
-
-        public class ActionS implements ActionListener {            //ActionListener pour chaque bouton
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JButton a = (JButton) e.getSource();
-                if (a.getText().equals("Kill")) {
-                    try {
-                        svs.close();
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                } else if (a.getText().equals("Bleu")) {
-                    try {
-                        svs = new ServerSocket(10000);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                }
-            }
-
-
-        }
-    }
 }

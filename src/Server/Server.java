@@ -28,40 +28,6 @@ public class Server extends JFrame implements Serializable {
                 t1.start();
             }
 
-
-            /*
-            do{
-
-                OutputStream out = s.getOutputStream();
-                ObjectOutputStream oout = new ObjectOutputStream(out);
-                oout.writeObject(sequenceServer);
-
-                OutputStreamWriter outWriter = new OutputStreamWriter(out);
-                PrintWriter writer = new PrintWriter(outWriter);
-                writer.println("Client connected");
-
-                InputStream in = s.getInputStream();
-                ObjectInputStream oin = new ObjectInputStream(in);
-                sequenceClient = (ArrayList<String>) oin.readObject();
-
-                System.out.println(sequenceClient.toString());
-
-                while(true) {
-                    if (sequenceClient == sequenceServer) {
-                        writer.println("correct");
-                        writer.flush();
-                        streak = ++streak;
-                        sequenceGenerator();
-                    } else {
-                        writer.println("false");
-                        writer.flush();
-                    }
-                }
-
-
-            } while (true);
-            */
-
         } catch (IOException e) {
             e.printStackTrace();
         }

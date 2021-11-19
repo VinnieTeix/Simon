@@ -9,38 +9,62 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server{
-    public Server() {
 
-        Random random = new Random();
-        int sequence = random.nextInt(4-1 + 1) + 1;
+
+    public Server() {
 
         try {
             ServerSocket svs = new ServerSocket(10000);
-            System.out.println("serveur lance sur le port...");
-            Socket s = svs.accept();
-            System.out.println("serveur connecte au client...");
-            String input;
 
+            System.out.println("Waiting for client connection...");
+
+            while(true) {
+                Socket s = svs.accept();
+                System.out.println("Client connected.");
+
+                ThreadServer t1 = new ThreadServer(s);
+                t1.start();
+            }
+
+            /*
             do{
-                InputStream in = s.getInputStream();
-                InputStreamReader inReader = new InputStreamReader(in);
-                BufferedReader buffReader = new BufferedReader(inReader);
-                input = buffReader.readLine();
-                System.out.println(input);
 
                 OutputStream out = s.getOutputStream();
+                ObjectOutputStream oout = new ObjectOutputStream(out);
+                oout.writeObject(sequenceServer);
+
                 OutputStreamWriter outWriter = new OutputStreamWriter(out);
                 PrintWriter writer = new PrintWriter(outWriter);
-                writer.println(input);
-                writer.flush();
+                writer.println("Client connected");
+
+                InputStream in = s.getInputStream();
+                ObjectInputStream oin = new ObjectInputStream(in);
+                sequenceClient = (ArrayList<String>) oin.readObject();
+
+                System.out.println(sequenceClient.toString());
+
+                while(true) {
+                    if (sequenceClient == sequenceServer) {
+                        writer.println("correct");
+                        writer.flush();
+                        streak = ++streak;
+                        sequenceGenerator();
+                    } else {
+                        writer.println("false");
+                        writer.flush();
+                    }
+                }
 
 
             } while (true);
+            */
 
         } catch (IOException e) {
-            System.out.println("Port used");
+            e.printStackTrace();
         }
 
 
     }
+
+
 }

@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ThreadServer extends Thread {
+public class ThreadServer extends Thread implements Serializable{
 
     Socket s;
     ArrayList<String> sequenceServer = new ArrayList<>();
@@ -40,36 +40,33 @@ public class ThreadServer extends Thread {
         try {
             do {
 
-                sequenceGenerator();
                 OutputStream out = s.getOutputStream();
                 ObjectOutputStream oout = new ObjectOutputStream(out);
                 oout.writeObject(sequenceServer);
-                System.out.println(sequenceServer);
-                oout.reset();
+                oout.flush();
 
-                OutputStreamWriter outWriter = new OutputStreamWriter(out);
-                PrintWriter writer = new PrintWriter(outWriter);
+                System.out.println("Sever sends: " + sequenceServer);
 
                 InputStream in = s.getInputStream();
                 ObjectInputStream oin = new ObjectInputStream(in);
                 sequenceClient = (ArrayList<String>) oin.readObject();
 
-                System.out.println(sequenceClient.toString());
+                System.out.println("Client sends: " + sequenceClient.toString());
 
-                while (true) {
-                    if ((sequenceClient).equals(sequenceServer)) {
-                        writer.println("correct");
-                        writer.flush();
-                        sequenceGenerator();
-                        oout.writeObject(sequenceServer);
-                        oout.reset();
-
-                    } else {
-                        writer.println("false");
-                        writer.flush();
-                    }
+                OutputStreamWriter outWriter = new OutputStreamWriter(oout);
+                PrintWriter writer = new PrintWriter(outWriter);
+                if ((sequenceClient).equals(sequenceServer)) {
+                    System.out.println("Correct.");
+                    sequenceGenerator();
+                    oout.writeObject(sequenceServer);
+                    writer.println("correcte");
+                    writer.flush();
+                } else {
+                    System.out.println("Incorrect.");
+                    sequenceServer.clear();
                 }
             } while(true);
+
         } catch (EOFException e){
             e.printStackTrace();
         } catch (IOException e) {

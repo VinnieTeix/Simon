@@ -12,10 +12,14 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class InterfaceClient extends JFrame {
-    public int inputNo = 0; //compteur des nombres d'entrées dans une séquence éffectué par le jouer
-    public ArrayList<String> sequence = new ArrayList<>();
-    public boolean write = false;
+public class InterfaceClient extends JFrame implements Serializable{
+
+    public ArrayList<String> sequence = new ArrayList<>();              // Sequence d'entrée par le joueur
+    public ArrayList<String> sequenceServ = new ArrayList<String>();    // Sequence à effectuer envoyé par le serveur
+
+    public InetAddress addr;    // Déclarer l'adresse et le socket ici permet d'executer les méthode d'envoie en
+    public Socket client;       // OutputStream directement dans la classe ActionListener
+
     public InterfaceClient() {
         setTitle("SimonClient");
 
@@ -53,8 +57,7 @@ public class InterfaceClient extends JFrame {
         jpl0.setLayout(new BorderLayout());
         jpl0.add(jpl1);
 
-
-        JButton enter = new JButton("Enter");
+        JButton enter = new JButton("Start/Restart");
         enter.addActionListener(new ActionL());
 
         jpl0.add(enter, BorderLayout.SOUTH);
@@ -67,9 +70,10 @@ public class InterfaceClient extends JFrame {
 
         new Client();
     }
-    public class ActionL implements ActionListener {
+
+    public class ActionL implements ActionListener {            //ActionListener pour chaque bouton
         @Override
-        public void actionPerformed (ActionEvent e){
+        public void actionPerformed(ActionEvent e) {
             JButton a = (JButton) e.getSource();
             if (a.getText().equals("Rouge")) {
                 sequence.add("rouge");
@@ -79,78 +83,67 @@ public class InterfaceClient extends JFrame {
                 sequence.add("jaune");
             } else if (a.getText().equals("Vert")) {
                 sequence.add("vert");
-            } else if (a.getText().equals("Enter")) {
-                Send();
+            } else if (a.getText().equals("Start/Restart")) {
+                sequence.clear();
+                try {
+                    OutputStream out = client.getOutputStream();
+                    ObjectOutputStream oout = new ObjectOutputStream(out);
+                    oout.writeObject(empty);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             } else {
                 System.out.println("Invalid input");
             }
-
+            try {                                                           // Le client envoit la combinaison après
+                OutputStream out = client.getOutputStream();                // que chaque bouton est appuyé
+                ObjectOutputStream oout = new ObjectOutputStream(out);      // en temps réel
+                oout.writeObject(sequence);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
             System.out.println(sequence.toString());
+
+            //if (sequence.size() > sequenceServ.size()){                     // Si le joueur dépasse le nombre d'entrée
+            //    sequence.clear();                                           // pour une combinaison elle sera
+            //}                                                               // réinitialisé mais la reception de la sequence
+                                                                                // du serveur fonctionne pas
         }
     }
+
+
+    ArrayList<String> empty = new ArrayList<String>();
+
 
     @SuppressWarnings("SpellCheckingInspection")
     public class Client {
         public Client() {
             try {
-                InetAddress addr = InetAddress.getLocalHost();
-                System.out.println("Connecting to server...");
-                Socket client = new Socket(addr, 10000);
-
-                OutputStream out = client.getOutputStream();
-                ObjectOutputStream oout = new ObjectOutputStream(out);
+                addr = InetAddress.getLocalHost();
+                client = new Socket(addr, 10000);
 
                 String svResponse;
-
-                InputStream in = client.getInputStream();
-                ObjectInputStream oin = new ObjectInputStream(in);
-                ArrayList<String> sequenceServ = (ArrayList<String>) oin.readObject();
-                System.out.println(sequenceServ.toString());
-
-
-
-                client.close();
-
-
-            } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                }
-            }
-
-            public void Send(){
-                try {
-                    System.out.println("Submitting :" + sequence.toString());
-                    InetAddress addr = InetAddress.getLocalHost();
-                    Socket client = new Socket(addr, 10000);
-
-                    OutputStream out = client.getOutputStream();
-                    ObjectOutputStream oout = new ObjectOutputStream(out);
-                    oout.writeObject(sequence);
-                    System.out.println("sent");
-
-                    String svResponse;
+                while (true) {
                     InputStream in = client.getInputStream();
-                    InputStreamReader inReader = new InputStreamReader(in);
                     ObjectInputStream oin = new ObjectInputStream(in);
-                    ArrayList<String> sequenceServ = (ArrayList<String>) oin.readObject();
+                    sequenceServ = (ArrayList<String>) oin.readObject();
                     System.out.println(sequenceServ.toString());
+
+                    InputStreamReader inReader = new InputStreamReader(in);
                     BufferedReader buffReader = new BufferedReader(inReader);
                     svResponse = buffReader.readLine();
                     System.out.println(svResponse);
 
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
                 }
 
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
+
         }
+    }
+}

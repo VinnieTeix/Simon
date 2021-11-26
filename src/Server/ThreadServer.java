@@ -53,17 +53,14 @@ public class ThreadServer extends Thread implements Serializable{
 
                 System.out.println("Client sends: " + sequenceClient.toString());
 
-                OutputStreamWriter outWriter = new OutputStreamWriter(oout);
-                PrintWriter writer = new PrintWriter(outWriter);
                 if ((sequenceClient).equals(sequenceServer)) {
                     System.out.println("Correct.");
                     sequenceGenerator();
                     oout.writeObject(sequenceServer);
-                    writer.println("correcte");
-                    writer.flush();
                 } else {
-                    System.out.println("Incorrect, press Start/Restart.");
+                    System.out.println("Incorrect.");
                     sequenceServer.clear();
+                    oout.writeObject(sequenceServer);
                 }
             } while(true);
 

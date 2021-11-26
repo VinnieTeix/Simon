@@ -15,12 +15,14 @@ import java.util.Scanner;
 public class InterfaceClient extends JFrame implements Serializable{
 
     public ArrayList<String> sequence = new ArrayList<>();              // Sequence d'entrée par le joueur
-    public ArrayList<String> sequenceServ = new ArrayList<String>();    // Sequence à effectuer envoyé par le serveur
+    public ArrayList<String> sequenceServ = new ArrayList<>();    // Sequence à effectuer envoyé par le serveur
 
-    public InetAddress addr;    // Déclarer l'adresse et le socket ici permet d'executer les méthode d'envoie en
-    public Socket client;       // OutputStream directement dans la classe ActionListener
+    public InetAddress addr = InetAddress.getLocalHost();    // Déclarer l'adresse et le socket ici permet d'executer les méthode d'envoie en
+    public Socket client = new Socket(addr, 10000);       // OutputStream directement dans la classe ActionListener
+    OutputStream out = client.getOutputStream();
+    ObjectOutputStream oout = new ObjectOutputStream(out);
 
-    public InterfaceClient() {
+    public InterfaceClient() throws IOException {
         setTitle("SimonClient");
 
 
@@ -60,8 +62,10 @@ public class InterfaceClient extends JFrame implements Serializable{
         JButton enter = new JButton("Start/Restart");
         enter.addActionListener(new ActionL());
 
-        jpl0.add(enter, BorderLayout.SOUTH);
+        JLabel userInput = new JLabel();
 
+        jpl0.add(enter, BorderLayout.SOUTH);
+        jpl0.add(userInput, BorderLayout.NORTH);
 
         add(jpl0);
         setSize(550, 500);
@@ -74,48 +78,45 @@ public class InterfaceClient extends JFrame implements Serializable{
     public class ActionL implements ActionListener {            //ActionListener pour chaque bouton
         @Override
         public void actionPerformed(ActionEvent e) {
+
+            try {
+
             JButton a = (JButton) e.getSource();
             if (a.getText().equals("Rouge")) {
                 sequence.add("rouge");
-                send();
+                oout.writeObject(sequence);
+                oout.flush();
             } else if (a.getText().equals("Bleu")) {
                 sequence.add("bleu");
-                send();
+                oout.writeObject(sequence);
+                oout.flush();
             } else if (a.getText().equals("Jaune")) {
                 sequence.add("jaune");
-                send();
+                oout.writeObject(sequence);
+                oout.flush();
             } else if (a.getText().equals("Vert")) {
                 sequence.add("vert");
-                send();
+                oout.writeObject(sequence);
+                oout.flush();
             } else if (a.getText().equals("Start/Restart")) {
                 sequence.clear();
                 try {
-                    OutputStream out = client.getOutputStream();
-                    ObjectOutputStream oout = new ObjectOutputStream(out);
                     oout.writeObject(empty);
+                    oout.flush();
+
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
+                }
+            } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
 
-
-                //if (sequence.size() > sequenceServ.size()){                     // Si le joueur dépasse le nombre d'entrée
-                //    sequence.clear();                                           // pour une combinaison elle sera
-                //}                                                               // réinitialisé mais la reception de la sequence
-                // du serveur fonctionne pas
+            System.out.println("Client sends: " + sequence.toString());
             }
 
+
         }
-        public void send(){
-            try {                                                       // Le client envoit la combinaison après
-            OutputStream out = client.getOutputStream();                // que chaque bouton est appuyé
-            ObjectOutputStream oout = new ObjectOutputStream(out);      // en temps réel
-            oout.writeObject(sequence);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-            System.out.println(sequence.toString());
-        }
-    }
 
 
     ArrayList<String> empty = new ArrayList<String>();
@@ -125,31 +126,38 @@ public class InterfaceClient extends JFrame implements Serializable{
     public class Client {
         public Client() {
             try {
-                addr = InetAddress.getLocalHost();
-                client = new Socket(addr, 10000);
 
-                String svResponse;
-                while (true) {
+                do {
                     InputStream in = client.getInputStream();
                     ObjectInputStream oin = new ObjectInputStream(in);
                     sequenceServ = (ArrayList<String>) oin.readObject();
-                    System.out.println(sequenceServ.toString());
+                    System.out.println("Server sends: " + sequenceServ.toString());
 
-                    InputStreamReader inReader = new InputStreamReader(in);
-                    BufferedReader buffReader = new BufferedReader(inReader);
-                    svResponse = buffReader.readLine();
-                    System.out.println(svResponse);
+                    if((sequenceServ.size()) == (sequence.size())){             // Compare la taille des sequences pour ensuite:
+                        if(sequenceServ.equals(empty)){                         // Si l'ArrayList envoyé par le serveur est vide càd le serveur a déterminé que le jouer a eu faux et donc s'est réinitialisé, la séquence du joueur se réinitialise aussi
+                            System.out.println("Incorrect, restarting...");
+                            sequence.clear();
+                        }
+                        else {
+                            System.out.println("Correct.");
+                            sequence.clear();
+                        }
+                    }
 
-                }
+                } while (true);
 
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
+        }
+    }
+
+    public class JLabelThread extends Thread{
+        public JLabelThread(ArrayList seq, JLabel jlb){
+            while (true) {
+                jlb.setText(seq.toString());
+            }
         }
     }
 }
